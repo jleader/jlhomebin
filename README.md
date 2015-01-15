@@ -1,5 +1,8 @@
 # Jeremy Leader's bin scripts #
 
+These are little useful scripts I've thrown together over the years, that don't
+have a home anywhere else.
+
 * `diffbuild` - convenience script to recursively diff two (mostly
     Perl) source directories, while ignoring build and source control
     clutter (e.g. `.git`, `.svn`, `blib`, etc.).
