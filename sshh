@@ -1,0 +1,4 @@
+#!/bin/sh
+screen -X title "$1"
+ssh $@
+screen -X title "zsh"

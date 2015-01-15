@@ -1,0 +1,2 @@
+#!/bin/sh
+diff -r --exclude .git --exclude .svn --exclude blib --exclude _build --exclude Build --exclude cover_db --exclude '*.log' $@

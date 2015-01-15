@@ -1,0 +1,102 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+# Given "svn log -v" output, print a list of packages matching a regex
+# passed as a parameter, and how many times various authors touched
+# files in that package.
+#
+# sample input (from "svn log -v"):
+#
+# ------------------------------------------------------------------------
+# r4615 | joe.schmoe | 2009-08-07 12:35:47 -0700 (Fri, 07 Aug 2009) | 4 lines
+# Changed paths:
+#    M /ds/trunk/My-Package/some/file
+#
+# Enhance My-Package.
+#
+
+my %touched;
+
+my $regex = shift;
+$regex = m{$regex};
+
+my $author;
+my $lines = 0;
+my $rev = 'START';
+my $expected = 'HEADLINE';
+while (<>) {
+    #debug($expected, $lines, $rev);
+    if ($expected eq 'LINE') {
+        expected($expected, 'LINE', $rev);
+        --$lines;
+        $expected = 'HEADLINE' if ($lines == 0);
+    }
+    elsif (/^-{72}$/) {
+        # new section
+        $lines == 0 or warn "too few lines, expecting $lines more in rev $rev";
+        expected($expected, 'HEADLINE', $rev);
+
+        undef $author;
+        undef $lines;
+        undef $rev;
+        $expected = 'REVLINE';
+    }
+    elsif (/^r(\d*) \| ([^ ]*) \| [^|]* \| (\d*) lines?$/) {
+        ($rev, $author, $lines) = ($1, $2, $3);
+        expected($expected, 'REVLINE', $rev);
+        $expected = 'CHANGED';
+    }
+    elsif (/^Changed paths:$/) {
+        expected($expected, 'CHANGED', $rev);
+        $expected = 'FILE';
+    }
+    elsif (/^   ([AR]) (.*) \(from .*:\d*\)$/) {
+        my ($type, $file) = ($1, $2);
+        expected($expected, 'FILE', $rev);
+        $expected = 'FILE';
+        touch_file($regex, $file, $author);
+    }
+    elsif (/^   ([AMD]) (.*)$/) {
+        my ($type, $file) = ($1, $2);
+        expected($expected, 'FILE', $rev);
+        $expected = 'FILE';
+        touch_file($regex, $file, $author);
+    }
+    elsif (/^$/) {
+        expected($expected, 'FILE', $rev);
+        $expected = 'LINE';
+    }
+    else {
+        warn "unexpected state, expecting $expected, in rev $rev";
+    }
+}
+#debug($expected, $lines, $rev, 'EOF');
+$expected eq 'REVLINE' or warn "expected $expected, got EOF in rev $rev";
+!$lines or warn "too few lines, expecting $lines more in final rev $rev";
+
+foreach my $pkg (sort keys %touched) {
+    my $pkgdata = $touched{$pkg};
+    print "$pkg:\n";
+    foreach my $auth ( sort { $pkgdata->{$a} <=> $pkgdata->{$b} } keys %{$pkgdata}) {
+        print "    $auth: $pkgdata->{$auth}\n";
+    }
+}
+
+sub expected {
+    my ($expect, $newstate, $rev) = @_;
+    $expect eq $newstate or warn "expected $expect, got $newstate in rev $rev";
+}
+
+sub debug {
+    my @args = map { defined $_ ? $_ : 'UNDEF' } @_;
+    print 'DEBUG: ', join(' ', @_), "\n";
+}
+
+sub touch_file {
+    my ($regex, $file, $author) = @_;
+    if ($file =~ $regex) {
+        ++($touched{$1}->{$author});
+    }
+}

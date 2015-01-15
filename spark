@@ -1,0 +1,79 @@
+#!/usr/bin/perl
+
+# inspired by https://github.com/holman/spark
+#
+# spark takes a comma or space separated list of data from the command line
+# or standard input and then prints a UTF-8 sparkline out of it.
+
+use strict;
+use warnings;
+use utf8;
+
+binmode STDOUT, ':utf8';
+my @ticks = map { chr 0x2580 + $_ } 1 .. 8;
+
+sub usage {
+    print <<'EOF';
+USAGE:
+spark [-h|-r] VALUE,...
+
+EXAMPLES:
+spark 1 5 22 13 53
+▁▁▃▂█
+spark 0,30,55,80,33,150
+▁▂▃▄▂█
+echo 9 13 5 17 1 | spark -r
+▄▆▂█▁
+1:17 [5] 9+/-6.32455532033676 1
+
+(in that last example, the minimum is 1, maximum 17, 5 data points,
+mean 9, standard deviation 6.32, last data value 1)
+EOF
+}
+
+my $range;
+
+if ($ARGV[0] eq '-r') {
+    $range = 1;
+    shift;
+}
+
+if ( (@ARGV == 0 && -t STDIN) || ($ARGV[0]||'') =~ /^-+h/ ) {
+    usage;
+    exit 0;
+}
+
+my ($min, $max);
+my @data = (@ARGV ? @ARGV : <>);
+@data = map { split /,|\s+/ } @data;
+foreach my $x (@data) {
+    if (!defined $max || $x > $max) {
+        $max = $x;
+    }
+    if (!defined $min || $x < $min) {
+        $min = $x;
+    }
+}
+
+# map $min to $ticks[0], $max to $ticks[$#ticks]
+my $scale = ($max - $min) / $#ticks;
+
+#print "DEBUG: data=", scalar(@data), " min=$min max=$max ticks=$#ticks scale=$scale\n";
+#use Data::Dumper; # DEBUG
+#print "DEBUG: ", Dumper(\@data);
+
+my $sum = 0;
+my $sq = 0;
+foreach my $x (@data) {
+    #print ' ', int(($x-$min)/$scale); # DEBUG
+    print $scale ? $ticks[int(($x-$min)/$scale)] : $ticks[0];
+    $sum += $x;
+    $sq += $x * $x;
+}
+print "\n";
+my $count = scalar @data;
+if ($range && $count > 1) {
+    my $avg = $sum / $count;
+    my $std = sqrt(($sq - ($sum * $sum / $count)) / ($count - 1));
+    print "$min:$max [$count] $avg+/-$std $data[-1]\n";
+}
