@@ -8,6 +8,9 @@ have a home anywhere else.
     clutter (e.g. `.git`, `.svn`, `blib`, etc.).
 * `findowner` - reads `svn log -v` output from stdin, and counts how many times
     different authors have updated each package that matches a regex.
+* `grabssh` - helper to capture ssh agent-forwarding environment to pass
+    into re-attached screen sessions. Inspired by
+    [Sam Rowe's blog post][samrowe].
 * `sshh` - sets `screen`'s title to the host being ssh'd to, and then
     sets it back to the default ("zsh") afterwards.
 * `spark` - takes a comma or space separated list of data from the
@@ -20,5 +23,6 @@ have a home anywhere else.
 * `unused-keys.pl` - searches Perl files passed on the command line for
     hash keys that are only used once. [Original script by Ovid][ovid]
 
+[samrowe]: http://samrowe.com/wordpress/ssh-agent-and-gnu-screen/
 [holmanspark]: https://github.com/holman/spark
 [ovid]: http://blogs.perl.org/users/ovid/2011/03/80-hacks.html
