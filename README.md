@@ -11,6 +11,9 @@ have a home anywhere else.
 * `grabssh` - helper to capture ssh agent-forwarding environment to pass
     into re-attached screen sessions. Inspired by
     [Sam Rowe's blog post][samrowe].
+* `git-rebase-all` - simple script that implements a `rebase-all` command for
+    git, which checks out and pulls (with --rebase) updates for all branches
+    based off of origin/master.
 * `sshh` - sets `screen`'s title to the host being ssh'd to, and then
     sets it back to the default ("zsh") afterwards.
 * `spark` - takes a comma or space separated list of data from the
