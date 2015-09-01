@@ -3,5 +3,5 @@
 for i in `git branch -vv | grep '\[origin/master:.*, behind [0-9]*' | grep -v '^..master' | sed -e 's/..\([^ ]*\).*/\1/'` master
 do
     echo "=== $i ==="
-    git checkout $i && git pull --rebase
+    git checkout $i && git pull --rebase || break
 done
