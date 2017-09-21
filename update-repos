@@ -1,0 +1,5 @@
+#!/bin/sh
+
+repos="$1"
+command=${2:-pull}
+grep -l $repos ~/*/.git/config | sed -e 's/\/\.git\/config//' | while read repo; do (echo "=== $repo ==="; cd $repo; git $command "${@:3}"); done 

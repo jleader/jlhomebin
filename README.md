@@ -25,6 +25,10 @@ have a home anywhere else.
     Usage: `svn diff --diff-cmd svndiff ...`)
 * `unused-keys.pl` - searches Perl files passed on the command line for
     hash keys that are only used once. [Original script by Ovid][ovid]
+* `update-repos` - updates all repositories whose config includes a specific
+    string (intended to be used to search for a specific hostname in the remote
+    url). By default, does a `git pull` from those repos, but a command
+    (without the leading `git`) can be specified explicitly.
 
 [samrowe]: http://samrowe.com/wordpress/ssh-agent-and-gnu-screen/
 [holmanspark]: https://github.com/holman/spark
