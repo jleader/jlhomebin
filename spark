@@ -33,7 +33,7 @@ EOF
 
 my $range;
 
-if ($ARGV[0] eq '-r') {
+if (($ARGV[0]||'') eq '-r') {
     $range = 1;
     shift;
 }
