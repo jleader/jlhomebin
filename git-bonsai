@@ -1,0 +1,51 @@
+#!/usr/bin/env perl
+
+# Stolen from robh@ziprecruiter.com
+
+use strict;
+use warnings;
+use feature qw(say);
+use experimental qw(signatures);
+
+my $remote        = grep { $_ eq '-r' || $_ eq '--remote' } @ARGV;
+my $merged_only   = grep { $_ eq '--merged' } @ARGV;
+my $unmerged_only = grep { $_ eq '--no-merged' } @ARGV;
+my $all = !$merged_only && !$unmerged_only;
+
+my @lines;
+
+if($remote) {
+    @lines = qx(git branch -r --list --sort=committerdate --format='%(committerdate:iso)\t%(objectname)\t%(refname:short)' 'origin/jeremy*');
+    chomp @lines;
+} else {
+    @lines = qx(git branch --sort=committerdate --format='%(committerdate:iso)\t%(objectname)\t%(refname:short)');
+    chomp @lines;
+}
+
+for my $line (@lines) {
+    my ( $date, $hash, $branch ) = split(/\t/, $line);
+
+    next if $branch eq 'master';
+    next if $branch eq 'main';
+    next if $branch eq 'prod.cicd.cli.cmd.cicd';
+    next if $branch eq 'prod.cicd.ciquery.cmd.ciquery';
+    next if $branch eq 'bg-gozr-worktree';
+
+    my @lines;
+    if($remote) {
+        @lines = qx(git cherry -v origin/main $branch);
+    } else {
+        @lines = qx(git cherry -v main $branch);
+    }
+    chomp @lines;
+
+    if((grep { /^[+]/ } @lines)) {
+        if($all || $unmerged_only) {
+            say "[$date] $hash $branch appears to NOT have been merged [x]";
+        }
+    } else {
+        if($all || $merged_only) {
+            say "[$date] $hash $branch appears to have been merged [✓]";
+        }
+    }
+}

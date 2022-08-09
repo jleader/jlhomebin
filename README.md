@@ -11,6 +11,9 @@ have a home anywhere else.
 * `grabssh` - helper to capture ssh agent-forwarding environment to pass
     into re-attached screen sessions. Inspired by
     [Sam Rowe's blog post][samrowe].
+* `git-bonsai` - script to check for branches that have already been
+    merged/cherry-picked/otherwise added to main, and so can be deleted.
+    Stolen from robh@ziprecruiter.com
 * `git-rebase-all` - simple script that implements a `rebase-all` command for
     git, which checks out and pulls (with --rebase) updates for all branches
     based off of origin/master.
